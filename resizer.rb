@@ -37,6 +37,11 @@ def uploadoriginal(file,path)
   	thumbnail.write(finalname){ self.quality = q }
     return filename_orig + extfinal
     
+    ext =nil 
+    thumbnail = nil 
+    filename_orig = nil
+    widthimage = nil 
+    image=nil
 end
 
 #preguntas al usuario 
