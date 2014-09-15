@@ -1,9 +1,8 @@
-require 'RMagick'
 require 'fileutils'
-
+require "mini_magick"
 
 #resize function
-def uploadoriginal(file,path)
+def uploadoriginal(file,path,newsize)
 	ext = File.extname(file)
   	if ext.upcase == ".JPG"
   		extfinal = ".jpg"
@@ -22,26 +21,15 @@ def uploadoriginal(file,path)
   	#remove white space in image name
   	filename_orig = filename_orig.gsub(" ","-")
 
-  	width = 1200
-
-  	image = Magick::Image.read(file).first
-
-  	widthimage = image.columns
-  	heightimage = image.rows
-  	height = (width * heightimage) / widthimage
-  	thumbnail = image.thumbnail(width, height)
-
+    image = MiniMagick::Image.open(file)
+    
+  	image.resize newsize
+    
   	#processed image filename
   	finalname = path + filename_orig + extfinal
-  	q=99
-  	thumbnail.write(finalname){ self.quality = q }
+  	image.write(finalname){ self.quality(100) }
     return filename_orig + extfinal
-    
-    ext =nil 
-    thumbnail = nil 
-    filename_orig = nil
-    widthimage = nil 
-    image=nil
+   
 end
 
 #preguntas al usuario 
@@ -66,21 +54,29 @@ unless File.directory?(destination_folder)
 end
 @path = "#{destination_folder}/"
 
-
+#new size
+puts "nuevo size"  
+	STDOUT.flush  
+	@newsize = gets.chomp
+	
+unless @newsize > 0.to_s
+	puts "error en nuevo size"
+	exit
+end
 		
 
 #leo el contenido de la carpeta
 dirListing = Dir.entries(folder_path)
 
-counter = 0
+
 dirListing.each { |file| 
 
 	accepted_formats = [".JPG", "JPEG", ".PNG", ".GIF"]
 	ext = File.extname(file)
 	
 	if accepted_formats.include? ext.upcase
-		counter = counter+1
-		puts "#{counter} >> Procesando: #{ext} | (#{file})"
+		
+		puts " Procesando: #{ext} | (#{file})"
 		#carpeta para guardar procesadas (salida)
 		#processed images folder (output)
 		#if not exits = 
@@ -89,7 +85,7 @@ dirListing.each { |file|
 		
 		@origen = "#{folder_path}/#{file}"
 		
-		uploadoriginal(@origen,@path)
+		uploadoriginal(@origen,@path,@newsize)
 	else
 		puts "Formato no valido #{ext} | (#{file})"
 	end
